@@ -1,0 +1,22 @@
+{
+  "name": "Integrated — IDE en Español",
+  "short_name": "Integrated",
+  "id": "./",
+  "description": "Entorno de desarrollo y programación en español para Arduino y ESP32. Funciona offline sin internet.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#080b2e",
+  "theme_color": "#080b2e",
+  "orientation": "any",
+  "categories": ["education", "development", "utilities"],
+  "icons": [
+    {
+      "src": "./icono.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
