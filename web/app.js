@@ -69,7 +69,26 @@ const origenIniciador = nombresHostLocal.includes(location.hostname)
   ? location.origin
   : 'http://127.0.0.1:8765';
 const urlApiLocal = ruta => `${origenIniciador}/api/${ruta}`;
-btnIniciadorSegundoPlano.hidden = !nombresHostLocal.includes(location.hostname);
+const esIntegratedEscritorio = location.protocol === 'http:' && nombresHostLocal.includes(location.hostname);
+const origenIniciador = nombresHostLocal.includes(location.hostname)
+  ? location.origin
+  : 'http://127.0.0.1:8765';
+const urlApiLocal = ruta => `${origenIniciador}/api/${ruta}`;
+btnIniciadorSegundoPlano.hidden = true;
+
+if (esIntegratedEscritorio) {
+  document.title = 'Integrated — IDE en Español para Arduino y ESP32';
+  document.querySelector('.titulo-app').textContent = 'Integrated';
+  document.querySelector('.subtitulo-app').textContent = 'IDE de escritorio · Arduino y ESP32';
+  document.querySelector('#btnDescargarEscritorio').hidden = true;
+  comboPuerto.hidden = false;
+  btnActualizarPuertos.hidden = false;
+  btnCargarPlaca.hidden = false;
+  btnMonitorSerial.hidden = false;
+  btnAyudaPuertos.hidden = false;
+  document.querySelector('footer span:last-child').textContent =
+    'Integrated · Editor, compilador y carga a placas Arduino y ESP32';
+}
 
 function cambiarEstadoMonitorSerial(conectado, mensaje, conectando = false) {
   estadoMonitorSerial.textContent = mensaje;
