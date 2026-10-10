@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
-CONFIG_PATH = Path(__file__).resolve().parent / "integrated_config.json"
+if getattr(sys, "frozen", False):
+    from app_paths import user_data_dir
+
+    CONFIG_PATH = user_data_dir() / "integrated_config.json"
+else:
+    CONFIG_PATH = Path(__file__).resolve().parent / "integrated_config.json"
 
 DEFAULTS = {
     "bg_principal": "#0D1117",
@@ -52,6 +58,7 @@ def guardar(data: dict) -> None:
         if k.startswith("header"):
             limpio[k] = v
     try:
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         CONFIG_PATH.write_text(json.dumps(limpio, indent=2, ensure_ascii=False), encoding="utf-8")
     except OSError:
         pass

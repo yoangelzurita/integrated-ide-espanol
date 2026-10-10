@@ -14,9 +14,11 @@ import time
 from pathlib import Path
 from typing import Callable, Optional
 
+from app_paths import is_packaged, user_data_dir
+
 BASE_DIR = Path(__file__).resolve().parent
 CLI_PATH = BASE_DIR / "arduino-cli.exe"
-CACHE_ROOT = BASE_DIR / ".integrated_build"
+CACHE_ROOT = user_data_dir() / ".integrated_build" if is_packaged() else BASE_DIR / ".integrated_build"
 PLATFORMIO_PATHS = (
     BASE_DIR / "pio.exe",
     Path.home() / ".platformio" / "penv" / "Scripts" / "platformio.exe",
