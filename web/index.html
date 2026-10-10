@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Integrated — IDE en Español para Arduino y ESP32</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icono.svg">
+  <meta name="theme-color" content="#080b2e">
+  <meta name="description" content="Entorno de programación en español para Arduino y ESP32. Funciona 100% offline sin internet y es instalable en el escritorio.">
+  <link rel="stylesheet" href="./estilos.css">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <img src="./icono.svg" alt="Logo Integrated">
+      <div>
+        <div class="titulo-app">Integrated Web</div>
+        <div class="subtitulo-app">IDE en Español (Offline / PWA)</div>
+      </div>
+    </div>
+
+    <div class="tools-area">
+      <div class="toolbar-group" aria-label="Conexión de hardware">
+        <span class="toolbar-title">Hardware</span>
+        <label for="comboPlacas">Placa</label>
+        <select id="comboPlacas">
+          <option value="ESP32 S2 Mini">ESP32 S2 Mini</option>
+          <option value="ESP32 Dev Module">ESP32 Dev Module</option>
+          <option value="ESP32-S3 Dev Module">ESP32-S3 Dev Module</option>
+          <option value="ESP32-C3 Dev Module">ESP32-C3 Dev Module</option>
+          <option value="ESP8266 NodeMCU">ESP8266 NodeMCU</option>
+          <option value="Arduino Uno">Arduino Uno</option>
+          <option value="Arduino Nano">Arduino Nano</option>
+          <option value="Arduino Mega 2560">Arduino Mega 2560</option>
+          <option value="Arduino Leonardo">Arduino Leonardo</option>
+          <option value="Arduino Micro">Arduino Micro</option>
+          <option value="Arduino Pro Mini">Arduino Pro Mini</option>
+        </select>
+        <label for="comboPuerto">Puerto</label>
+        <select id="comboPuerto" aria-label="Puerto de la placa">
+          <option value="">Detectando puertos...</option>
+        </select>
+        <button id="btnActualizarPuertos" title="Volver a buscar placas conectadas">↻ Puertos</button>
+        <button id="btnElegirUsb" title="Permitir acceso USB al navegador" hidden>🔌 Elegir USB</button>
+        <button id="btnMonitorSerial" class="btn-secundario" title="Abrir monitor serial de la placa">Monitor serial</button>
+        <button id="btnIniciadorSegundoPlano" title="Minimizar la ventana del iniciador sin detener el acceso a la placa">Minimizar iniciador</button>
+        <button id="btnAyudaPuertos">¿No aparece?</button>
+      </div>
+
+      <div class="toolbar-group" aria-label="Código y ejemplos">
+        <span class="toolbar-title">Código</span>
+        <label for="comboEjemplos">Ejemplos</label>
+        <select id="comboEjemplos">
+          <option value="">-- Cargar ejemplo --</option>
+          <option value="hola">Básico — Hola por Monitor Serie</option>
+          <option value="semaforo">Básico — Semáforo de tres luces</option>
+          <option value="sensorLuz">Básico — Sensor de luz y aviso</option>
+          <option value="hotspot">ESP32 S2 Mini — Panel web personalizable</option>
+          <option value="riego">Riego automático de maceta</option>
+          <option value="funciones">Funciones reutilizables — Luz con botón</option>
+          <option value="dimmer">Brillo de LED con potenciómetro</option>
+          <option value="toggle">Luz con pulsador</option>
+          <option value="blink">Parpadeo LED simple</option>
+        </select>
+        <button id="btnBiblioteca" class="btn-secundario">📚 Biblioteca</button>
+        <button id="btnTraducir" class="btn-accion" title="Traducir el código (F5 o Ctrl+Enter)">⚡ Traducir</button>
+      </div>
+
+      <div class="toolbar-group toolbar-group-proyecto" aria-label="Proyecto">
+        <span class="toolbar-title">Proyecto</span>
+        <button id="btnCargarPlaca" class="btn-cargar">⬆ Cargar a la placa</button>
+        <button id="btnCopiarCpp">📋 Copiar C++</button>
+        <button id="btnDescargarIno" title="Descargar el código C++ como .ino (Ctrl+Shift+S)">💾 Descargar .ino</button>
+        <button id="btnGuardarProyecto" title="Guardar proyecto .int_esp (Ctrl+S)">💾 Guardar .int_esp</button>
+        <button id="btnAbrirProyecto">📂 Abrir proyecto</button>
+        <button id="btnInstalarApp" class="btn-instalar">📥 Instalar app</button>
+        <input id="archivoProyecto" type="file" accept=".int_esp,.es,.txt" hidden>
+      </div>
+    </div>
+  </header>
+
+  <section id="avisoArchivoLocal" class="aviso-local" hidden>
+    <div>
+      <strong>Estás usando la versión como archivo.</strong>
+      <span>Así no se pueden detectar puertos COM ni instalar la app offline. Abre Integrated desde localhost.</span>
+    </div>
+    <button id="btnAbrirLocalhost" class="btn-cargar">Abrir Integrated en localhost</button>
+  </section>
+
+  <div class="main-container">
+    <!-- Panel Izquierdo: Editor en Español -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>Código en Español (.int_esp)</span>
+        <span style="font-size: 11px; color: var(--acento);">Edición en vivo</span>
+      </div>
+      <div class="editor-wrapper">
+        <textarea id="editorEspanol" spellcheck="false" placeholder="Escribe tu código en español aquí..."></textarea>
+        <div id="listaAutocompletado" class="autocompletado" role="listbox" aria-label="Sugerencias de comandos" hidden></div>
+      </div>
+    </div>
+
+    <!-- Panel Derecho: C++ Generado -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>C++ Equivalente (Arduino)</span>
+        <span id="badgeEstado" style="font-size: 11px; color: var(--acento-2);">Sincronizado</span>
+      </div>
+      <div class="editor-wrapper">
+        <textarea id="cppSalida" readonly spellcheck="false"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <section id="progresoCarga" class="progreso-carga" role="status" aria-live="polite" hidden>
+    <div class="progreso-carga-texto">
+      <strong id="estadoCarga">Preparando carga…</strong>
+      <span id="porcentajeCarga">En espera</span>
+    </div>
+    <progress id="barraProgresoCarga" max="100" aria-label="Progreso de compilación y carga"></progress>
+    <details class="detalle-salida-carga">
+      <summary>Ver salida de compilación</summary>
+      <pre id="salidaCarga"></pre>
+    </details>
+  </section>
+
+  <section id="panelMonitorSerial" class="monitor-serial" aria-label="Monitor serial" hidden>
+    <div class="monitor-serial-cabecera">
+      <div>
+        <strong>Monitor serial</strong>
+        <span id="estadoMonitorSerial" aria-live="polite">Desconectado</span>
+      </div>
+      <div class="monitor-serial-controles">
+        <label for="comboVelocidadSerie">Velocidad</label>
+        <select id="comboVelocidadSerie" aria-label="Velocidad del monitor serial">
+          <option value="9600">9600</option>
+          <option value="19200">19200</option>
+          <option value="38400">38400</option>
+          <option value="57600">57600</option>
+          <option value="74880">74880</option>
+          <option value="115200" selected>115200</option>
+          <option value="230400">230400</option>
+        </select>
+        <span class="monitor-serial-ayuda">Debe coincidir con «velocidad serie» del programa; desconéctalo antes de cargar.</span>
+        <button id="btnConectarMonitor" class="btn-cargar">Conectar</button>
+        <button id="btnLimpiarMonitor">Limpiar</button>
+        <button id="btnCerrarMonitor">Cerrar</button>
+      </div>
+    </div>
+    <pre id="salidaMonitorSerial" class="monitor-serial-salida" role="log" aria-live="polite" aria-relevant="additions text"></pre>
+    <form id="formEnviarSerie" class="monitor-serial-envio">
+      <label class="sr-only" for="entradaMonitorSerial">Texto para enviar a la placa</label>
+      <input id="entradaMonitorSerial" type="text" placeholder="Escribe un mensaje para la placa…" autocomplete="off">
+      <label for="comboFinLinea">Final</label>
+      <select id="comboFinLinea" aria-label="Final de línea">
+        <option value="none">Sin salto</option>
+        <option value="newline" selected>NL</option>
+        <option value="both">NL + CR</option>
+      </select>
+      <button id="btnEnviarSerie" type="submit" disabled>Enviar</button>
+    </form>
+  </section>
+
+  <footer>
+    <span id="lblEstado">Listo para programar (offline)</span>
+    <span>Integrated PWA · Offline · La carga requiere el iniciador local</span>
+  </footer>
+
+  <!-- Modal Biblioteca de Comandos -->
+  <div id="modalBiblioteca" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="color:var(--acento-2);">Biblioteca de Comandos en Español</h3>
+        <div class="modal-header-acciones">
+          <button id="btnExpandirBiblioteca" type="button" aria-pressed="false" style="padding:4px 10px;">⛶ Agrandar</button>
+          <button id="btnCerrarModal" style="padding:4px 10px;">✕ Cerrar</button>
+        </div>
+      </div>
+      <div style="padding: 10px 16px; background:#000018; border-bottom:1px solid var(--borde);">
+        <input type="text" id="buscCmd" placeholder="Buscar comando..." style="width:100%; padding:8px 12px; background:var(--bg-elevado); color:#fff; border:1px solid var(--borde); border-radius:6px; outline:none;">
+      </div>
+      <div class="modal-body">
+        <div id="listaComandos" class="modal-list"></div>
+        <div id="detalleComando" class="modal-detail">
+          <p style="color:var(--fg-muted);">Selecciona un comando para ver su sintaxis, descripción y ejemplo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalInstalacion" class="modal">
+    <div class="modal-content modal-ayuda">
+      <div class="modal-header">
+        <h3 style="color:var(--acento-2);">Instalar Integrated</h3>
+        <button id="btnCerrarInstalacion" style="padding:4px 10px;">✕ Cerrar</button>
+      </div>
+      <div class="modal-ayuda-cuerpo">
+        <p id="textoInstalacion"></p>
+        <p>Para que funcione sin internet, abre primero Integrated desde <strong>Iniciar Integrated Web.bat</strong>, instala la app desde ese navegador y espera a que cargue una vez.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalPuertos" class="modal">
+    <div class="modal-content modal-ayuda">
+      <div class="modal-header">
+        <h3 style="color:var(--acento-2);">La placa no aparece</h3>
+        <button id="btnCerrarPuertos" style="padding:4px 10px;">✕ Cerrar</button>
+      </div>
+      <div class="modal-ayuda-cuerpo">
+        <p id="textoDiagnosticoPuertos">Pulsa «Puertos» para consultar de nuevo los dispositivos.</p>
+        <ol>
+          <li>Usa un cable USB que transfiera datos; algunos cables solo cargan.</li>
+          <li>Prueba otro puerto USB y conecta la placa directamente, sin hub.</li>
+          <li>En Windows, abre Administrador de dispositivos y revisa «Puertos (COM y LPT)» y «Otros dispositivos».</li>
+          <li>Si aparece CP210x, CH340 o un dispositivo desconocido, instala el controlador USB correspondiente y vuelve a pulsar «Puertos».</li>
+          <li>Cierra el Monitor Serie y otras aplicaciones que puedan estar usando el mismo puerto.</li>
+        </ol>
+        <p>En ESP32-S2 con USB nativo, el puerto puede desaparecer en modo bootloader: mantén BOOT, pulsa RESET, suelta RESET y luego BOOT; vuelve a buscar el puerto.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./traductor_web.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
