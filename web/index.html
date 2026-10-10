@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Integrated — IDE en Español para Arduino y ESP32</title>
+  <title>Integrated Simulador — IDE en Español para Arduino y ESP32</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./icono.svg">
   <meta name="theme-color" content="#080b2e">
-  <meta name="description" content="Entorno de programación en español para Arduino y ESP32. Funciona 100% offline sin internet y es instalable en el escritorio.">
+  <meta name="description" content="Editor y traductor web offline para aprender programación de Arduino y ESP32. Descarga Integrated para Windows para conectarte a placas reales.">
   <link rel="stylesheet" href="./estilos.css">
 </head>
 <body>
@@ -15,14 +15,14 @@
     <div class="logo-area">
       <img src="./icono.svg" alt="Logo Integrated">
       <div>
-        <div class="titulo-app">Integrated Web</div>
-        <div class="subtitulo-app">IDE en Español (Offline / PWA)</div>
+        <div class="titulo-app">Integrated Simulador</div>
+        <div class="subtitulo-app">Editor y traductor web · Modo aprendizaje</div>
       </div>
     </div>
 
     <div class="tools-area">
-      <div class="toolbar-group" aria-label="Conexión de hardware">
-        <span class="toolbar-title">Hardware</span>
+      <div class="toolbar-group" aria-label="Placa de destino">
+        <span class="toolbar-title">Placa destino</span>
         <label for="comboPlacas">Placa</label>
         <select id="comboPlacas">
           <option value="ESP32 S2 Mini">ESP32 S2 Mini</option>
@@ -37,15 +37,15 @@
           <option value="Arduino Micro">Arduino Micro</option>
           <option value="Arduino Pro Mini">Arduino Pro Mini</option>
         </select>
-        <label for="comboPuerto">Puerto</label>
-        <select id="comboPuerto" aria-label="Puerto de la placa">
+        <label for="comboPuerto" hidden>Puerto</label>
+        <select id="comboPuerto" aria-label="Puerto de la placa" hidden>
           <option value="">Detectando puertos...</option>
         </select>
-        <button id="btnActualizarPuertos" title="Volver a buscar placas conectadas">↻ Puertos</button>
+        <button id="btnActualizarPuertos" title="Volver a buscar placas conectadas" hidden>↻ Puertos</button>
         <button id="btnElegirUsb" title="Permitir acceso USB al navegador" hidden>🔌 Elegir USB</button>
-        <button id="btnMonitorSerial" class="btn-secundario" title="Abrir monitor serial de la placa">Monitor serial</button>
-        <button id="btnIniciadorSegundoPlano" title="Minimizar la ventana del iniciador sin detener el acceso a la placa">Minimizar iniciador</button>
-        <button id="btnAyudaPuertos">¿No aparece?</button>
+        <button id="btnMonitorSerial" class="btn-secundario" title="Abrir monitor serial de la placa" hidden>Monitor serial</button>
+        <button id="btnIniciadorSegundoPlano" title="Minimizar la ventana del iniciador sin detener el acceso a la placa" hidden>Minimizar iniciador</button>
+        <button id="btnAyudaPuertos" hidden>¿No aparece?</button>
       </div>
 
       <div class="toolbar-group" aria-label="Código y ejemplos">
@@ -69,12 +69,12 @@
 
       <div class="toolbar-group toolbar-group-proyecto" aria-label="Proyecto">
         <span class="toolbar-title">Proyecto</span>
-        <button id="btnCargarPlaca" class="btn-cargar">⬆ Cargar a la placa</button>
+        <button id="btnCargarPlaca" class="btn-cargar" hidden>⬆ Cargar a la placa</button>
         <button id="btnCopiarCpp">📋 Copiar C++</button>
         <button id="btnDescargarIno" title="Descargar el código C++ como .ino (Ctrl+Shift+S)">💾 Descargar .ino</button>
         <button id="btnGuardarProyecto" title="Guardar proyecto .int_esp (Ctrl+S)">💾 Guardar .int_esp</button>
         <button id="btnAbrirProyecto">📂 Abrir proyecto</button>
-        <button id="btnInstalarApp" class="btn-instalar">📥 Instalar app</button>
+        <a id="btnDescargarEscritorio" class="btn-instalar" href="https://github.com/yoangelzurita/integrated-ide-espanol/releases/latest/download/Integrated-Setup.exe">⬇ Descargar Integrated para Windows</a>
         <input id="archivoProyecto" type="file" accept=".int_esp,.es,.txt" hidden>
       </div>
     </div>
@@ -82,10 +82,10 @@
 
   <section id="avisoArchivoLocal" class="aviso-local" hidden>
     <div>
-      <strong>Estás usando la versión como archivo.</strong>
-      <span>Así no se pueden detectar puertos COM ni instalar la app offline. Abre Integrated desde localhost.</span>
+      <strong>La versión Simulador es solo web.</strong>
+      <span>Para conectar una placa, descarga e instala Integrated para Windows.</span>
     </div>
-    <button id="btnAbrirLocalhost" class="btn-cargar">Abrir Integrated en localhost</button>
+    <a class="btn-instalar" href="https://github.com/yoangelzurita/integrated-ide-espanol/releases/latest/download/Integrated-Setup.exe">⬇ Descargar Integrated para Windows</a>
   </section>
 
   <div class="main-container">
@@ -164,7 +164,7 @@
 
   <footer>
     <span id="lblEstado">Listo para programar (offline)</span>
-    <span>Integrated PWA · Offline · La carga requiere el iniciador local</span>
+    <span>Integrated Simulador · Editor y traductor offline · Las placas reales requieren Integrated para Windows</span>
   </footer>
 
   <!-- Modal Biblioteca de Comandos -->
@@ -185,19 +185,6 @@
         <div id="detalleComando" class="modal-detail">
           <p style="color:var(--fg-muted);">Selecciona un comando para ver su sintaxis, descripción y ejemplo.</p>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="modalInstalacion" class="modal">
-    <div class="modal-content modal-ayuda">
-      <div class="modal-header">
-        <h3 style="color:var(--acento-2);">Instalar Integrated</h3>
-        <button id="btnCerrarInstalacion" style="padding:4px 10px;">✕ Cerrar</button>
-      </div>
-      <div class="modal-ayuda-cuerpo">
-        <p id="textoInstalacion"></p>
-        <p>Para que funcione sin internet, abre primero Integrated desde <strong>Iniciar Integrated Web.bat</strong>, instala la app desde ese navegador y espera a que cargue una vez.</p>
       </div>
     </div>
   </div>

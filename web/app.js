@@ -1,5 +1,5 @@
 /**
- * Lógica de la Web App PWA de Integrated
+ * Lógica del simulador web de Integrated
  */
 
 // Registro de Service Worker para funcionamiento 100% offline
@@ -43,7 +43,6 @@ const btnDescargarIno = document.getElementById('btnDescargarIno');
 const btnGuardarProyecto = document.getElementById('btnGuardarProyecto');
 const btnAbrirProyecto = document.getElementById('btnAbrirProyecto');
 const archivoProyecto = document.getElementById('archivoProyecto');
-const btnInstalarApp = document.getElementById('btnInstalarApp');
 const btnBiblioteca = document.getElementById('btnBiblioteca');
 const btnExpandirBiblioteca = document.getElementById('btnExpandirBiblioteca');
 const modalBiblioteca = document.getElementById('modalBiblioteca');
@@ -59,9 +58,6 @@ const porcentajeCarga = document.getElementById('porcentajeCarga');
 const barraProgresoCarga = document.getElementById('barraProgresoCarga');
 const salidaCarga = document.getElementById('salidaCarga');
 const detalleSalidaCarga = document.querySelector('.detalle-salida-carga');
-const modalInstalacion = document.getElementById('modalInstalacion');
-const textoInstalacion = document.getElementById('textoInstalacion');
-const btnCerrarInstalacion = document.getElementById('btnCerrarInstalacion');
 const modalPuertos = document.getElementById('modalPuertos');
 const btnCerrarPuertos = document.getElementById('btnCerrarPuertos');
 const textoDiagnosticoPuertos = document.getElementById('textoDiagnosticoPuertos');
@@ -580,6 +576,15 @@ async function actualizarPuertos(silencioso = false) {
     if (!silencioso) lblEstado.textContent = "Abre «Iniciar Integrated Web.bat» para detectar puertos COM y cargar programas.";
     return;
   }
+  if (!nombresHostLocal.includes(location.hostname)) {
+    if (comboPuerto.options[0]?.textContent !== 'Disponible en Integrated para Windows') {
+      comboPuerto.replaceChildren(new Option('Disponible en Integrated para Windows', ''));
+    }
+    if (!silencioso) {
+      lblEstado.textContent = "La versión Simulador no se conecta a placas. Descarga Integrated para Windows para cargar programas.";
+    }
+    return;
+  }
   if (consultandoPuertos) return;
   consultandoPuertos = true;
   const puertoAnterior = comboPuerto.value;
@@ -783,7 +788,7 @@ formEnviarSerie.addEventListener('submit', async evento => {
   }
 });
 
-btnElegirUsb.hidden = !('serial' in navigator) || location.protocol === 'file:';
+btnElegirUsb.hidden = !nombresHostLocal.includes(location.hostname) || !('serial' in navigator) || location.protocol === 'file:';
 btnElegirUsb.addEventListener('click', async () => {
   try {
     const dispositivo = await navigator.serial.requestPort();
@@ -959,69 +964,6 @@ buscCmd.addEventListener('input', () => {
   const filtrados = COMANDOS_MODAL.filter(c => c.nombre.toLowerCase().includes(term) || c.desc.toLowerCase().includes(term));
   renderizarListaComandos(filtrados);
 });
-
-// PWA Instalación en Escritorio (beforeinstallprompt)
-let diferidoPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  diferidoPrompt = e;
-  btnInstalarApp.style.display = 'inline-block';
-  lblEstado.textContent = "Puedes instalar Integrated en tu escritorio con el botón verde superior.";
-});
-
-window.addEventListener('appinstalled', () => {
-  btnInstalarApp.style.display = 'none';
-  lblEstado.textContent = "Integrated quedó instalada y disponible sin conexión.";
-});
-
-function mostrarAyudaInstalacion() {
-  const ua = navigator.userAgent;
-  let pasos;
-  if (location.protocol === 'file:') {
-    pasos = "Estás abriendo index.html como archivo. Los navegadores bloquean la instalación y el modo offline de archivos file://. Cierra esta pestaña y abre «Iniciar Integrated Web.bat» en la carpeta del proyecto. Se abrirá http://127.0.0.1:8765; desde esa dirección instala Integrated con el menú del navegador.";
-  } else if (/iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-    pasos = "En Safari de iPhone o iPad, pulsa Compartir y elige «Añadir a pantalla de inicio». La PWA debe servirse desde HTTPS; localhost solo funciona en la misma computadora.";
-  } else if (/Firefox/i.test(ua) && /Android/i.test(ua)) {
-    pasos = "En Firefox para Android, abre el menú ⋮ y selecciona «Instalar» o «Añadir a pantalla de inicio».";
-  } else if (/Firefox/i.test(ua)) {
-    pasos = "Firefox de escritorio no ofrece instalación PWA nativa. Puedes usar Integrated offline en esa pestaña; para instalar como app, usa Edge o Chrome y el menú de instalación de la barra de direcciones.";
-  } else if (/Macintosh/i.test(ua) && /Safari/i.test(ua) && !/Chrome|Chromium|Edg/i.test(ua)) {
-    pasos = "En Safari de macOS, elige Archivo > «Añadir al Dock».";
-  } else if (/Android/i.test(ua)) {
-    pasos = "Abre el menú del navegador y elige «Instalar aplicación» o «Añadir a pantalla de inicio».";
-  } else {
-    pasos = "Abre el menú de instalación de la barra de direcciones. En Edge suele aparecer «Aplicaciones > Instalar este sitio como una aplicación»; en Chrome, usa el icono Instalar o el menú ⋮ > «Instalar Integrated».";
-  }
-  textoInstalacion.textContent = pasos;
-  modalInstalacion.style.display = 'flex';
-}
-
-btnCerrarInstalacion.addEventListener('click', () => {
-  modalInstalacion.style.display = 'none';
-});
-
-btnInstalarApp.addEventListener('click', async () => {
-  if (diferidoPrompt) {
-    try {
-      diferidoPrompt.prompt();
-      const { outcome } = await diferidoPrompt.userChoice;
-      if (outcome === 'accepted') {
-        btnInstalarApp.style.display = 'none';
-        lblEstado.textContent = "¡Integrated instalada como aplicación de escritorio!";
-      }
-    } catch (error) {
-      lblEstado.textContent = "No se pudo iniciar la instalación: " + error.message;
-    } finally {
-      diferidoPrompt = null;
-    }
-  } else {
-    mostrarAyudaInstalacion();
-  }
-});
-
-if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-  btnInstalarApp.style.display = 'none';
-}
 
 // Recupera el último proyecto editado, incluso después de cerrar la app offline.
 try {

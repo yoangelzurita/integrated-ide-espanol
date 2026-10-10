@@ -1,8 +1,8 @@
 {
-  "name": "Integrated — IDE en Español",
-  "short_name": "Integrated",
+  "name": "Integrated Simulador — IDE en Español",
+  "short_name": "Integrated Simulador",
   "id": "./",
-  "description": "Entorno de desarrollo y programación en español para Arduino y ESP32. Funciona offline sin internet.",
+  "description": "Simulador web en español para aprender Arduino y ESP32, disponible offline.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
