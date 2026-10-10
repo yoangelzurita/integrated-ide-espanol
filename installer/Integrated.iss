@@ -1,5 +1,5 @@
 #define MyAppName "Integrated"
-#define MyAppVersion "0.1.4"
+#define MyAppVersion "0.1.5"
 #define MyAppPublisher "Integrated"
 #define MyAppExeName "Integrated.exe"
 
@@ -25,10 +25,12 @@ Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; Gr
 
 [Files]
 Source: "..\dist\Integrated\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\webview2-setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 [Icons]
 Name: "{group}\Integrated"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\Integrated"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
+Filename: "{tmp}\webview2-setup.exe"; Parameters: "/silent /install"; StatusMsg: "Preparando el componente de ventana de Integrated..."; Flags: waituntilterminated runhidden
 Filename: "{app}\{#MyAppExeName}"; Description: "Abrir Integrated"; Flags: postinstall nowait skipifsilent
