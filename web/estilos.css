@@ -169,12 +169,18 @@ button.btn-secundario:hover {
   background-color: #79b8ff;
 }
 
-button.btn-instalar {
+button.btn-instalar,
+a.btn-instalar {
   background: linear-gradient(135deg, #3b82f6, #10b981);
   color: #ffffff;
   font-weight: 700;
   border: none;
   display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 button.btn-cargar {
