@@ -24,6 +24,8 @@ from placas import fqbn_de, nombres_placas
 BASE_DIR = Path(__file__).resolve().parent
 WEB_DIR = BASE_DIR / "web"
 PUERTO_INICIAL = 8765
+ORIGENES_WEB_PERMITIDOS = {"https://yoangelzurita.github.io"}
+HOSTS_LOOPBACK_PERMITIDOS = {"127.0.0.1", "localhost"}
 _CARGA_LOCK = threading.Lock()
 _SERIAL_MONITOR_LOCK = threading.Lock()
 _SERIAL_WRITE_LOCK = threading.Lock()
@@ -38,7 +40,36 @@ class IntegratedHandler(SimpleHTTPRequestHandler):
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store" if self.path.startswith("/api/") else "public, max-age=0")
+        origen = self.headers.get("Origin")
+        if self.path.startswith("/api/") and origen and self._origen_web_permitido(origen):
+            self.send_header("Access-Control-Allow-Origin", origen)
+            self.send_header("Vary", "Origin")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Max-Age", "600")
+            if self.headers.get("Access-Control-Request-Private-Network") == "true":
+                self.send_header("Access-Control-Allow-Private-Network", "true")
         super().end_headers()
+
+    def do_OPTIONS(self):
+        ruta = urlsplit(self.path).path
+        metodo_solicitado = self.headers.get("Access-Control-Request-Method", "")
+        encabezados_solicitados = {
+            encabezado.strip().lower()
+            for encabezado in self.headers.get("Access-Control-Request-Headers", "").split(",")
+            if encabezado.strip()
+        }
+        if (
+            not ruta.startswith("/api/")
+            or not self._origen_local_valido()
+            or metodo_solicitado not in {"GET", "POST"}
+            or not encabezados_solicitados.issubset({"content-type"})
+        ):
+            self._json(403, {"error": "Solicitud de red local no permitida"})
+            return
+        self.send_response(204)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def do_GET(self):
         ruta = urlsplit(self.path)
@@ -382,17 +413,45 @@ class IntegratedHandler(SimpleHTTPRequestHandler):
             "mensaje": "Programa compilado y cargado correctamente",
         })
 
-    def _origen_local_valido(self) -> bool:
-        origen = self.headers.get("Origin")
-        host = self.headers.get("Host", "")
-        if not host.startswith(("127.0.0.1:", "localhost:")):
+    def _host_loopback_valido(self) -> bool:
+        try:
+            host, puerto = self.headers.get("Host", "").rsplit(":", 1)
+            return (
+                host.lower() in HOSTS_LOOPBACK_PERMITIDOS
+                and int(puerto) == self.server.server_address[1]
+            )
+        except (ValueError, AttributeError):
             return False
+
+    def _origen_web_permitido(self, origen: str) -> bool:
+        if origen in ORIGENES_WEB_PERMITIDOS:
+            return True
+        partes = urlsplit(origen)
+        try:
+            return (
+                partes.scheme == "http"
+                and partes.hostname in HOSTS_LOOPBACK_PERMITIDOS
+                and partes.port == self.server.server_address[1]
+                and not partes.path
+                and not partes.query
+                and not partes.fragment
+            )
+        except ValueError:
+            return False
+
+    def _origen_local_valido(self) -> bool:
+        if not self._host_loopback_valido():
+            return False
+        origen = self.headers.get("Origin")
         if origen:
-            return origen == f"http://{host}"
+            return self._origen_web_permitido(origen)
         if self.headers.get("Sec-Fetch-Site") == "same-origin":
             return True
         referer = urlsplit(self.headers.get("Referer", ""))
-        return referer.scheme == "http" and referer.netloc == host
+        return (
+            referer.scheme == "http"
+            and self._origen_web_permitido(f"{referer.scheme}://{referer.netloc}")
+        )
 
     def _json(self, estado: int, datos: dict):
         cuerpo = json.dumps(datos, ensure_ascii=False).encode("utf-8")
