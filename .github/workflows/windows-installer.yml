@@ -6,7 +6,7 @@ on:
       version:
         description: "Version tag for the Windows installer release"
         required: true
-        default: "v0.1.2"
+        default: "v0.1.3"
   push:
     tags:
       - "v*"
@@ -36,6 +36,9 @@ jobs:
           Invoke-WebRequest https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Windows_64bit.zip -OutFile arduino-cli.zip
           Expand-Archive arduino-cli.zip -DestinationPath arduino-cli
           Copy-Item arduino-cli\arduino-cli.exe arduino-cli.exe
+
+      - name: Validate Python source
+        run: python -m py_compile main.py biblioteca.py build_manager.py config.py consola.py ejemplos.py placas.py traductor.py vocabulario.py app_paths.py
 
       - name: Package Integrated desktop app
         run: pyinstaller --noconfirm --clean --windowed --name Integrated --paths . --collect-all serial --hidden-import biblioteca --hidden-import vocabulario --hidden-import traductor --hidden-import placas --hidden-import consola --hidden-import ejemplos --hidden-import build_manager --hidden-import config --hidden-import app_paths --add-binary "arduino-cli.exe;." --add-data "biblioteca.py;." --add-data "web;web" main.py
