@@ -10,7 +10,6 @@ import socketserver
 import sys
 import threading
 import time
-import webbrowser
 from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
@@ -484,16 +483,39 @@ def main():
     mimetypes.add_type("application/manifest+json", ".json")
     servidor = _crear_servidor()
     url = f"http://127.0.0.1:{servidor.server_address[1]}/index.html"
-    print("Integrated Web está disponible en:", url)
-    print("Mantén esta ventana abierta mientras uses la aplicación.")
+    print("Integrated está disponible en:", url)
     if not (build.cli_disponible() or build.platformio_disponible()):
-        print("Aviso: falta Arduino CLI/PlatformIO; la web abre, pero no podrá cargar a la placa.")
-    threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+        print("Aviso: falta Arduino CLI/PlatformIO; no se podrán cargar programas.")
+    hilo_servidor = threading.Thread(target=servidor.serve_forever, daemon=True)
+    hilo_servidor.start()
     try:
-        servidor.serve_forever()
-    except KeyboardInterrupt:
-        print("\nCerrando Integrated Web.")
+        import webview
+
+        webview.create_window(
+            "Integrated — IDE en Español para Arduino y ESP32",
+            url,
+            width=1440,
+            height=900,
+            min_size=(900, 600),
+            text_select=True,
+        )
+        webview.start(gui="edgechromium", debug=False)
+    except Exception as error:
+        import tkinter as tk
+        from tkinter import messagebox
+
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror(
+            "No se pudo iniciar Integrated",
+            "Integrated no pudo abrir su ventana de escritorio.\n\n"
+            "Comprueba que Microsoft Edge WebView2 Runtime esté instalado "
+            "y vuelve a abrir la aplicación.\n\n"
+            f"Detalle: {error}",
+        )
+        root.destroy()
     finally:
+        servidor.shutdown()
         servidor.server_close()
 
 
