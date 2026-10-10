@@ -6,7 +6,7 @@ on:
       version:
         description: "Version tag for the Windows installer release"
         required: true
-        default: "v0.1.0"
+        default: "v0.1.1"
   push:
     tags:
       - "v*"
@@ -38,7 +38,7 @@ jobs:
           Copy-Item arduino-cli\arduino-cli.exe arduino-cli.exe
 
       - name: Package Integrated desktop app
-        run: pyinstaller --noconfirm --clean --windowed --name Integrated --collect-all serial --add-binary "arduino-cli.exe;." --add-data "web;web" main.py
+        run: pyinstaller --noconfirm --clean --windowed --name Integrated --collect-all serial --hidden-import biblioteca --hidden-import vocabulario --hidden-import traductor --hidden-import placas --hidden-import consola --hidden-import ejemplos --hidden-import build_manager --hidden-import config --hidden-import app_paths --add-binary "arduino-cli.exe;." --add-data "web;web" main.py
 
       - name: Install Inno Setup
         run: choco install innosetup --yes --no-progress
