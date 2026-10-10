@@ -1282,6 +1282,7 @@ COMANDOS: list[dict] = [
         "cpp": "__servidorIntegrated.handleClient();",
         "notas": "Si no llamas a 'servidor atender' en el loop, el servidor HTTP no funciona.",
         "placas": "ESP32, ESP8266",
+    },
     {
         "nombre": "servidor al recibir",
         "categoria": "Servidor Web (ESP32/ESP8266)",
