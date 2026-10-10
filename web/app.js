@@ -69,7 +69,12 @@ const listaAutocompletado = document.getElementById('listaAutocompletado');
 const avisoArchivoLocal = document.getElementById('avisoArchivoLocal');
 const btnAbrirLocalhost = document.getElementById('btnAbrirLocalhost');
 let controladorMonitorSerial = null;
-btnIniciadorSegundoPlano.hidden = !['127.0.0.1', 'localhost'].includes(location.hostname);
+const nombresHostLocal = ['127.0.0.1', 'localhost'];
+const origenIniciador = nombresHostLocal.includes(location.hostname)
+  ? location.origin
+  : 'http://127.0.0.1:8765';
+const urlApiLocal = ruta => `${origenIniciador}/api/${ruta}`;
+btnIniciadorSegundoPlano.hidden = !nombresHostLocal.includes(location.hostname);
 
 function cambiarEstadoMonitorSerial(conectado, mensaje, conectando = false) {
   estadoMonitorSerial.textContent = mensaje;
@@ -108,7 +113,7 @@ async function conectarMonitorSerial() {
   });
   cambiarEstadoMonitorSerial(false, `Conectando a ${puerto}…`, true);
   try {
-    const respuesta = await fetch(`./api/serial/read?${query}`, {
+    const respuesta = await fetch(`${urlApiLocal('serial/read')}?${query}`, {
       cache: 'no-store',
       signal: controlador.signal
     });
@@ -580,7 +585,7 @@ async function actualizarPuertos(silencioso = false) {
   const puertoAnterior = comboPuerto.value;
   if (!silencioso) btnActualizarPuertos.disabled = true;
   try {
-    const respuesta = await fetch('./api/ports', { cache: 'no-store' });
+    const respuesta = await fetch(urlApiLocal('ports'), { cache: 'no-store' });
     const datos = await respuesta.json();
     if (!respuesta.ok) throw new Error(datos.ayuda ? `${datos.error} ${datos.ayuda}` : (datos.error || `HTTP ${respuesta.status}`));
     const nuevosPuertos = datos.puertos.map(puerto => {
@@ -617,11 +622,11 @@ async function actualizarPuertos(silencioso = false) {
     }
     textoDiagnosticoPuertos.textContent = location.protocol === 'file:'
       ? "Estás usando file://. Cierra esta página y abre «Iniciar Integrated Web.bat»; la detección USB necesita que la web se sirva desde localhost."
-      : `No se pudo consultar el iniciador local: ${error.message}`;
+      : `No se pudo contactar el iniciador local en ${origenIniciador}. Inicia «Iniciar Integrated Web.bat» en la computadora conectada a la placa y vuelve a pulsar «Puertos». Si el navegador pregunta, permite el acceso a la red local. Detalle: ${error.message}`;
     if (!silencioso) {
       lblEstado.textContent = location.protocol === 'file:'
         ? "Abre «Iniciar Integrated Web.bat»; una página file:// no puede detectar puertos COM."
-        : `No se pudo consultar el iniciador local: ${error.message}`;
+        : `Inicia el iniciador local en esta computadora y permite el acceso a la red local del navegador.`;
     }
   } finally {
     consultandoPuertos = false;
@@ -648,7 +653,7 @@ btnCargarPlaca.addEventListener('click', async () => {
   detalleSalidaCarga.open = false;
   lblEstado.textContent = `Compilando para ${comboPlacas.value} en ${puerto}...`;
   try {
-    const respuesta = await fetch('./api/upload', {
+    const respuesta = await fetch(urlApiLocal('upload'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -729,7 +734,7 @@ btnIniciadorSegundoPlano.addEventListener('click', async () => {
   btnIniciadorSegundoPlano.disabled = true;
   lblEstado.textContent = "Enviando el iniciador local al segundo plano…";
   try {
-    const respuesta = await fetch('./api/launcher/background', { method: 'POST' });
+    const respuesta = await fetch(urlApiLocal('launcher/background'), { method: 'POST' });
     const datos = await respuesta.json().catch(() => ({}));
     if (!respuesta.ok) throw new Error(datos.error || `HTTP ${respuesta.status}`);
     lblEstado.textContent = datos.mensaje;
@@ -762,7 +767,7 @@ formEnviarSerie.addEventListener('submit', async evento => {
       : '';
   btnEnviarSerie.disabled = true;
   try {
-    const respuesta = await fetch('./api/serial/write', {
+    const respuesta = await fetch(urlApiLocal('serial/write'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ texto: texto + finalLinea })

@@ -1,5 +1,5 @@
 // Service Worker de Integrated — Garantiza funcionamiento 100% offline sin internet
-const CACHE_NAME = 'integrated-offline-v8';
+const CACHE_NAME = 'integrated-offline-v9';
 const RECURSOS_CACHE = [
   './',
   './index.html',
