@@ -1,11 +1,11 @@
 // Service Worker de Integrated — Garantiza funcionamiento 100% offline sin internet
-const CACHE_NAME = 'integrated-simulador-offline-v10';
+const CACHE_NAME = 'integrated-simulador-offline-v11';
 const RECURSOS_CACHE = [
   './',
   './index.html',
   './estilos.css',
   './traductor_web.js',
-  './app.js',
+  './app.js?v=simulador-2',
   './manifest.json',
   './icono.svg'
 ];
