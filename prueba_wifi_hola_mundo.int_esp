@@ -1,0 +1,36 @@
+// Requiere ESP32 o ESP8266 con WiFi integrado
+// Cambia el nombre y la clave por los de tu red.
+velocidad serie 115200
+
+variable texto = nombre
+variable texto = password
+
+al iniciar
+configurar led integrado
+asignar nombre = "NOMBRE_REAL_DE_TU_WIFI"
+asignar password = "CLAVE_REAL_DE_TU_WIFI"
+wifi conectar nombre password
+servidor iniciar 80
+servidor html "/":
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Integrated</title>
+		<style>
+			body { background: #101820; color: #40d47e; font-family: sans-serif; text-align: center; }
+			button { padding: 12px; }
+		</style>
+	</head>
+	<body>
+		<h1>Hola mundo</h1>
+		<button onclick="saludar()">Probar JavaScript</button>
+		<script>
+			function saludar() { alert('La placa responde'); }
+		</script>
+	</body>
+</html>
+fin html
+
+repetir siempre
+parpadear led integrado 500
+servidor atender

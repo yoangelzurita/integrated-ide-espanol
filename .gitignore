@@ -1,0 +1,7 @@
+integrated_config.json
+.integrated_build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/

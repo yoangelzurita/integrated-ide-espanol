@@ -1,0 +1,22 @@
+{
+  "bg_principal": "#00002b",
+  "bg_secundario": "#00002b",
+  "bg_editor": "#00001e",
+  "bg_elevado": "#000031",
+  "fg_texto": "#E6EDF3",
+  "fg_muted": "#8B949E",
+  "fg_editor": "#00ff00",
+  "acento": "#3FB950",
+  "acento_2": "#58A6FF",
+  "peligro": "#F85149",
+  "borde": "#757575",
+  "header_texto": "#E6EDF3",
+  "header_titulo": "Integrated",
+  "header_subtitulo": "IDE en español",
+  "header_color": "#000017",
+  "tam_fuente": 10,
+  "placa": "ESP32 S2 Mini",
+  "baud_monitor": 115200,
+  "geometry": "1366x745+4+0",
+  "recursos_web": "C:/Users/USUARIO/Desktop/probando intergrate"
+}

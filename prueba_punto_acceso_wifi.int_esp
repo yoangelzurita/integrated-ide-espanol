@@ -1,0 +1,15 @@
+// Prueba real de punto de acceso WiFi del ESP32.
+// Red creada: esp32_s2_mini_wifi
+// Clave: 12345678
+// Abre http://192.168.4.1 desde un dispositivo conectado a esa red.
+velocidad serie 115200
+
+al iniciar
+configurar led integrado
+wifi crear punto de acceso "esp32_s2_mini_wifi" "12345678"
+servidor iniciar 80
+servidor html "/" "<html><body><h1>Hola desde mi ESP32</h1></body></html>"
+
+repetir siempre
+parpadear led integrado 500
+servidor atender
