@@ -63,7 +63,6 @@ const btnCerrarPuertos = document.getElementById('btnCerrarPuertos');
 const textoDiagnosticoPuertos = document.getElementById('textoDiagnosticoPuertos');
 const listaAutocompletado = document.getElementById('listaAutocompletado');
 const avisoArchivoLocal = document.getElementById('avisoArchivoLocal');
-const btnAbrirLocalhost = document.getElementById('btnAbrirLocalhost');
 let controladorMonitorSerial = null;
 const nombresHostLocal = ['127.0.0.1', 'localhost'];
 const origenIniciador = nombresHostLocal.includes(location.hostname)
@@ -820,10 +819,6 @@ btnAyudaPuertos.addEventListener('click', () => {
 
 btnCerrarPuertos.addEventListener('click', () => {
   modalPuertos.style.display = 'none';
-});
-
-btnAbrirLocalhost.addEventListener('click', () => {
-  window.location.assign('http://127.0.0.1:8765/');
 });
 
 actualizarPuertos();
