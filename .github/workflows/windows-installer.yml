@@ -6,7 +6,7 @@ on:
       version:
         description: "Version tag for the Windows installer release"
         required: true
-        default: "v0.1.4"
+        default: "v0.1.5"
   push:
     tags:
       - "v*"
@@ -37,11 +37,14 @@ jobs:
           Expand-Archive arduino-cli.zip -DestinationPath arduino-cli
           Copy-Item arduino-cli\arduino-cli.exe arduino-cli.exe
 
+      - name: Download WebView2 Runtime bootstrapper
+        run: Invoke-WebRequest https://go.microsoft.com/fwlink/p/?LinkId=2124703 -OutFile webview2-setup.exe
+
       - name: Validate Python source
         run: python -m py_compile web_launcher.py biblioteca.py build_manager.py config.py consola.py ejemplos.py placas.py traductor.py vocabulario.py app_paths.py
 
       - name: Package Integrated desktop app
-        run: pyinstaller --noconfirm --clean --windowed --name Integrated --paths . --collect-all serial --add-binary "arduino-cli.exe;." --add-data "web;web" web_launcher.py
+        run: pyinstaller --noconfirm --clean --windowed --name Integrated --paths . --collect-all serial --collect-all webview --collect-all pythonnet --collect-all clr_loader --hidden-import webview.platforms.edgechromium --add-binary "arduino-cli.exe;." --add-data "web;web" web_launcher.py
 
       - name: Verify bundled desktop application
         run: |
@@ -50,7 +53,8 @@ jobs:
             "dist\Integrated\_internal\web\estilos.css",
             "dist\Integrated\_internal\web\app.js",
             "dist\Integrated\_internal\web\icono.svg",
-            "dist\Integrated\_internal\arduino-cli.exe"
+            "dist\Integrated\_internal\arduino-cli.exe",
+            "webview2-setup.exe"
           )
           foreach ($file in $requiredFiles) {
             if (-not (Test-Path $file)) {
